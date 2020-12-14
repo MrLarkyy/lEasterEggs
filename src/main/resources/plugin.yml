@@ -1,0 +1,3 @@
+name: Eastereggs
+version: ${project.version}
+main: eastereggs.Eastereggs
