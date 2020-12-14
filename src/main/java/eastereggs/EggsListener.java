@@ -5,6 +5,7 @@ import eastereggs.Managers.EggPlayer;
 import eastereggs.Managers.StorageManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -15,6 +16,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -45,17 +47,26 @@ public class EggsListener implements Listener {
         Block b = e.getBlock();
 
         if (p.isSneaking()) {
-            if (storage.getEgg(b.getLocation())!=null) {
-                Egg egg = storage.getEgg(b.getLocation());
+            new BukkitRunnable() {
+                @Override
+                public void run(){
+                    if (storage.getEgg(b.getLocation())!=null) {
+                        Egg egg = storage.getEgg(b.getLocation());
 
-                for (String str : main.getDataFile().getConfigurationSection("players").getKeys(false)) {
-                    Player player = Bukkit.getPlayer(str);
-                    if (storage.hasEgg(player.getUniqueId(), egg))
-                        storage.getPlayer(player.getUniqueId()).removeEgg(egg);
+                        for (String str : main.getDataFile().getConfigurationSection("players").getKeys(false)) {
+                            OfflinePlayer player = Bukkit.getOfflinePlayer(str);
+                            if (storage.hasEgg(player.getUniqueId(), egg))
+                                storage.getPlayer(player.getUniqueId()).removeEgg(egg);
+                        }
+                        try {
+                            storage.removeEgg(egg);
+                        } catch (IOException ioException) {
+                            ioException.printStackTrace();
+                        }
+                        p.sendMessage("Vejce odebráno!");
+                    }
                 }
-                storage.removeEgg(egg);
-                p.sendMessage("Vejce odebráno!");
-            }
+            }.runTaskAsynchronously(main);
         }
     }
 

@@ -126,10 +126,13 @@ public class StorageManager {
     }
 
     public EggPlayer getPlayer(UUID uuid) {
+        if (!this.players.containsKey(uuid)) addPlayer(new EggPlayer(uuid,new ArrayList<>()));
         return this.players.get(uuid);
     }
 
     public boolean hasEgg (UUID uuid, Egg egg) {
+        if (getPlayer(uuid)==null) Bukkit.broadcastMessage("Player is null");
+        if (getPlayer(uuid).getEggs()==null) Bukkit.broadcastMessage("Eggs are null");
         return (getPlayer(uuid).getEggs().contains(egg));
     }
 
