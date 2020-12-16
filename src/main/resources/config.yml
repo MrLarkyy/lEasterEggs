@@ -1,0 +1,116 @@
+messages:
+
+  ##This message is sent when a player doesn't have permissions to a command
+  nopermission: "&cYou have no permission to do that!"
+
+  ##This message is sent when you type unknown ID of an egg
+  unknownid: "This ID is unknown! Check IDs in /ee menu"
+
+  ##This message is sent when you are editting egg's commands and you have to type something into chat
+  ##When you want to quit the editting action, you can just type "cancel"
+  alreadyeditting: "&cYou are already editting an egg!\n&7&oType 'cancel' to cancel the action!"
+
+  ##This message is sent when you type "/ee create" and don't have any block/skull in your main hand
+  ##The block is then used as an easter egg when you place it!
+  mustholdblock: "&cYou must hold a block to create an Easter Egg!"
+
+  ##This message is sent when you successfully make an Easter Egg item from your holding Block/Skull
+  ##After placing it, it creates a new EasterEgg and add into a database.
+  eastereggitemmade: "You have made a new &eEaster Egg&f!\n&7To register it to database, you have to place it!"
+
+  ##This message is sent when you teleport to an Easter Egg
+  teleported: "&fYou have been teleported to &eEaster Egg &6#%id%&f!"
+
+  ##This message is sent when you successfully break an Easter Egg by Shift+Breaking the block
+  eggremoved: "&cEgg was successfully removed!"
+
+  ##This message is sent when you place an Easter Egg item from /ee create command
+  eggcreated: "&fYou have created an &eEaster Egg&f!"
+
+  ##This message is sent when you find an Easter Egg
+  eggfound: "&fYou have found an&e Easter Egg &6#%id%&f!"
+
+  ##This message is sent when you click on Easter Egg that you have already found
+  alreadyfound: "&cYou have already found this Easter Egg!"
+
+  ##This message is sent when you click on "Add Command" item.
+  ##When you type a command into chat, it adds it into commands list.
+  ##You can also use %player% as a player variable
+  typecommand: "&e[!] &fType command into the chat! &c(Don't use slashes!)\n&7&oType 'cancel' to cancel the action" #Variables: %player%
+
+  ##This message is sent when you successfully add a new command to an Easter Egg
+  commandadded: "Command &e%cmd%&f has been added!"
+
+  ##This message is sent when you remove a command from an Easter Egg
+  commandremoved: "Command &c%cmd%&f has been &cremoved&f!"
+
+  ##This message is sent when you type 'cancel' when editting Egg's commands
+  actioncancelled: "&cAction has been cancelled!"
+
+  ##This message is sent when you type '/ee createrandom'
+  ##The command gives you a skull that changes a skin every 1.5 secs and after every block place event!
+  randomegggive: "&aRandom Egg has been given!"
+
+  ##Usages for commands
+  usages:
+    tp: "&cUsage: /ee tp <ID>"
+
+##Particle effects on non-found Eggs
+##Particles are per-player, so if you found an egg and other player not, only the player will see the particle effect!
+particles:
+
+  ##Enable particles?
+  enabled: true
+
+  ##Type of particle effect
+  ##List of particles: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Particle.html
+  particle: VILLAGER_HAPPY
+
+  ##Amount of particles that would be spawned
+  count: 7
+
+##Sounds on some events...
+sounds:
+
+  ##A sound when you find a new Easter Egg
+  eggfound:
+
+    ##Enable Sound?
+    enabled: true
+
+    ##Type of sound
+    ##List of sounds for 1.12.2: https://helpch.at/docs/1.12.2/org/bukkit/Sound.html
+    ##List of sounds for 1.16.4: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Sound.html
+    sound: ENTITY_PLAYER_LEVELUP
+
+    ##Pitch of the sound
+    pitch: 1
+
+  ##A sound when you click on already found Easter Egg
+  alreadyfound:
+
+    ##Enable Sound?
+    enabled: true
+
+  ##Type of sound
+    ##List of sounds for 1.12.2: https://helpch.at/docs/1.12.2/org/bukkit/Sound.html
+    ##List of sounds for 1.16.4: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Sound.html
+    sound: ENTITY_VILLAGER_ANGRY
+
+    ##Pitch of the sound
+    pitch: 1
+
+##Textures for skins when you use /ee createrandom
+eggtextures:
+  - "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjU2ZjdmM2YzNTM2NTA2NjI2ZDVmMzViNDVkN2ZkZjJkOGFhYjI2MDA4NDU2NjU5ZWZlYjkxZTRjM2E5YzUifX19"
+  - "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNThiOWUyOWFiMWE3OTVlMmI4ODdmYWYxYjFhMzEwMjVlN2NjMzA3MzMzMGFmZWMzNzUzOTNiNDVmYTMzNWQxIn19fQ=="
+  - "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjJjZDVkZjlkN2YxZmE4MzQxZmNjZTJmM2MxMThlMmY1MTdlNGQyZDk5ZGYyYzUxZDYxZDkzZWQ3ZjgzZTEzIn19fQ=="
+  - "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYzc2NTk1ZWZmY2M1NjI3ZTg1YjE0YzljODgyNDY3MWI1ZWMyOTY1NjU5YzhjNDE3ODQ5YTY2Nzg3OGZhNDkwIn19fQ=="
+  - "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjNkNjliMjNhZTU5MmM2NDdlYjhkY2ViOWRhYWNlNDQxMzlmNzQ4ZTczNGRjODQ5NjI2MTNjMzY2YTA4YiJ9fX0="
+  - "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2RjM2VlNDYxNDdmMzM3ZGE0ZGY5MTRiZDUyODg3MTI4N2Y5ZTY3MmM5NjQ1YmY1MWQ0MzhjYTU1NDM4ZjM5NyJ9fX0="
+
+##Permissions for commands
+permissions:
+  tp: "leggs.tp"
+  menu: "leggs.menu"
+  create: "leggs.create"

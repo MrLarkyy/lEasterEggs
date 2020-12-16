@@ -4,6 +4,7 @@ import eastereggs.Eastereggs;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.entity.Player;
 
 import java.io.IOException;
 import java.util.*;
@@ -13,6 +14,8 @@ public class StorageManager {
     private Eastereggs main;
     private HashMap<Integer,Egg> eggs;
     private HashMap<UUID,EggPlayer> players;
+    private HashMap<Player,Egg> editingegg = new HashMap<>();
+    private List<Player> isTyping = new ArrayList<>();
 
     public StorageManager(Eastereggs main) {this.main = main;}
 
@@ -27,6 +30,9 @@ public class StorageManager {
                 World w = Bukkit.getWorld(main.getDataFile().getString("eggs."+str+".world"));
                 Location loc =new Location(w,x,y,z);
                 ArrayList<String> commands = (ArrayList<String>) main.getDataFile().get("eggs."+str+".commands");
+                if (commands == null){
+                    commands = new ArrayList<String>();
+                }
 
                 Egg egg = new Egg(loc,commands);
 
@@ -91,11 +97,20 @@ public class StorageManager {
             }
         }
     }
+    public HashMap<Integer,Egg> getEggs() {
+        return (HashMap<Integer, Egg>) eggs.clone();
+    }
+    public HashMap<Integer,Egg> getEggsForParticles() {
+        return (HashMap<Integer, Egg>) eggs.clone();
+    }
+
+
     public void removeEgg(Egg egg) throws IOException {
-        for (Map.Entry<Integer, Egg> pair : eggs.entrySet()) {
-            if (pair.getValue().equals(egg))
-                eggs.remove(pair.getKey());
-        }
+        if (egg!=null && eggs!=null)
+            for (Map.Entry<Integer, Egg> pair : getEggs().entrySet()) {
+                if (pair.getValue().equals(egg))
+                    eggs.remove(pair.getKey());
+            }
         main.getDataFile().set("eggs",null);
         saveEggs();
         saveEggPlayers();
@@ -105,6 +120,22 @@ public class StorageManager {
         players.put(eggPlayer.getUuid(),eggPlayer);
     }
 
+    public void addEditingEgg (Player p, Egg egg) {
+        editingegg.remove(p);
+        editingegg.put(p,egg);
+    }
+    public Egg getEditingEgg (Player p) {
+        return editingegg.get(p);
+    }
+    public Boolean isTyping (Player p) {
+        return isTyping.contains(p);
+    }
+    public void addTyping (Player p) {
+        isTyping.add(p);
+    }
+    public void removeTyping (Player p) {
+        isTyping.remove(p);
+    }
 
     public Egg getEgg(Location loc) {
         for (Map.Entry<Integer, Egg> pair : eggs.entrySet()) {
@@ -117,17 +148,17 @@ public class StorageManager {
     public int getEggID(Egg egg) {
         for (Map.Entry<Integer,Egg> pair2 : eggs.entrySet()) {
             if (egg.equals(pair2.getValue())) {
-                Bukkit.broadcastMessage("GetID: "+pair2.getKey());
                 return pair2.getKey();
             }
         }
-        Bukkit.broadcastMessage("GetID: null");
         return 0;
     }
 
     public EggPlayer getPlayer(UUID uuid) {
-        if (!this.players.containsKey(uuid)) addPlayer(new EggPlayer(uuid,new ArrayList<>()));
         return this.players.get(uuid);
+    }
+    public HashMap<UUID,EggPlayer> getPlayers() {
+        return this.players;
     }
 
     public boolean hasEgg (UUID uuid, Egg egg) {

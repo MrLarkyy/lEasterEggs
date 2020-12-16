@@ -2,27 +2,34 @@ package eastereggs;
 
 import eastereggs.Managers.Egg;
 import eastereggs.Managers.EggPlayer;
+import eastereggs.Managers.Inventories.CommandsGUI;
+import eastereggs.Managers.Inventories.EditorGUI;
+import eastereggs.Managers.Inventories.GUI;
+import eastereggs.Managers.Inventories.GUIUtil;
 import eastereggs.Managers.StorageManager;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.Skull;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class EggsListener implements Listener {
 
@@ -34,6 +41,7 @@ public class EggsListener implements Listener {
         this.main = main;
         this.storage = main.storage;
     }
+    public GUIUtil util = new GUIUtil();
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
@@ -53,31 +61,44 @@ public class EggsListener implements Listener {
                     if (storage.getEgg(b.getLocation())!=null) {
                         Egg egg = storage.getEgg(b.getLocation());
 
-                        for (String str : main.getDataFile().getConfigurationSection("players").getKeys(false)) {
-                            OfflinePlayer player = Bukkit.getOfflinePlayer(str);
-                            if (storage.hasEgg(player.getUniqueId(), egg))
-                                storage.getPlayer(player.getUniqueId()).removeEgg(egg);
+                        for (UUID uuid : storage.getPlayers().keySet()) {
+                            OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
+                            if (player!=null)
+                                if (storage.hasEgg(player.getUniqueId(),egg))
+                                    storage.getPlayer(player.getUniqueId()).removeEgg(egg);
                         }
                         try {
                             storage.removeEgg(egg);
                         } catch (IOException ioException) {
                             ioException.printStackTrace();
                         }
-                        p.sendMessage("Vejce odebráno!");
+                        main.sendMessage(p, main.getConfigString("messages.eggremoved","&cEgg was successfully removed!"));
                     }
                 }
             }.runTaskAsynchronously(main);
         }
     }
 
-    @EventHandler
+    private List<String> textures = main.getConfigList("eggtextures",Arrays.asList("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjU2ZjdmM2YzNTM2NTA2NjI2ZDVmMzViNDVkN2ZkZjJkOGFhYjI2MDA4NDU2NjU5ZWZlYjkxZTRjM2E5YzUifX19","eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNThiOWUyOWFiMWE3OTVlMmI4ODdmYWYxYjFhMzEwMjVlN2NjMzA3MzMzMGFmZWMzNzUzOTNiNDVmYTMzNWQxIn19fQ==", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjJjZDVkZjlkN2YxZmE4MzQxZmNjZTJmM2MxMThlMmY1MTdlNGQyZDk5ZGYyYzUxZDYxZDkzZWQ3ZjgzZTEzIn19fQ==", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYzc2NTk1ZWZmY2M1NjI3ZTg1YjE0YzljODgyNDY3MWI1ZWMyOTY1NjU5YzhjNDE3ODQ5YTY2Nzg3OGZhNDkwIn19fQ==", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjNkNjliMjNhZTU5MmM2NDdlYjhkY2ViOWRhYWNlNDQxMzlmNzQ4ZTczNGRjODQ5NjI2MTNjMzY2YTA4YiJ9fX0=", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2RjM2VlNDYxNDdmMzM3ZGE0ZGY5MTRiZDUyODg3MTI4N2Y5ZTY3MmM5NjQ1YmY1MWQ0MzhjYTU1NDM4ZjM5NyJ9fX0="));
+    @EventHandler (ignoreCancelled = true)
     public void onPlace(BlockPlaceEvent e) throws IOException {
         Player p = e.getPlayer();
         Block b = e.getBlockPlaced();
 
-        main.saveEgg(b.getLocation(),Arrays.asList("s","c"),p);
-        p.sendMessage("You have saved an easter egg!");
-        main.getDataFile().save(main.getFile());
+        if (p.getInventory().getItemInMainHand().getItemMeta()!=null && p.getInventory().getItemInMainHand().getItemMeta().getLocalizedName()!=null) {
+            if (p.getInventory().getItemInMainHand().getItemMeta().getLocalizedName().contains("easteregg")) {
+                main.saveEgg(b.getLocation(), null, p);
+                main.sendMessage(p, main.getConfigString("messages.eggcreated","&fYou have created an &eEaster Egg&f!"));
+                main.getDataFile().save(main.getFile());
+            }
+            if (p.getInventory().getItemInMainHand().getItemMeta().getLocalizedName().equals("randomeasteregg")) {
+                Collections.shuffle(textures);
+
+                ItemStack item = p.getInventory().getItemInMainHand();
+
+                util.setSkullItemSkin(item,textures.get(1));
+            }
+        }
     }
     @EventHandler
     public void onInteract(PlayerInteractEvent e) {
@@ -88,21 +109,169 @@ public class EggsListener implements Listener {
                 Egg egg = storage.getEgg(b.getLocation());
                 if (!storage.hasEgg(p.getUniqueId(),egg)) {
                     storage.getPlayer(p.getUniqueId()).addEgg(egg);
-                    p.sendMessage("našel jsi varle");
+                    main.sendMessage(p,main.getConfigString("messages.eggfound","&fYou have found an&e Easter Egg &6#%id%&f!").replace("%id%",String.valueOf(storage.getEggID(egg))));
+                    if (main.getConfigBoolean("sounds.eggfound.enabled",true))
+                        p.playSound(p.getLocation(),Sound.valueOf(main.getConfigString("sounds.eggfound.sound","ENTITY_PLAYER_LEVELUP")),1,main.getConfigInt("sounds.eggfound.pitch",1));
 
+                    // Sending Commands
+                    if (egg.getCommands()!=null)
+                    for (String str : egg.getCommands()) {
+                        Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(),str.replace("%player%",p.getName()));
+
+                    }
+                } else {
+                    main.sendMessage(p,main.getConfigString("messages.alreadyfound","&cYou have already found this Easter Egg!"));
+                    if (main.getConfigBoolean("sounds.alreadyfound.enabled",true)) p.playSound(p.getLocation(),Sound.valueOf(main.getConfigString("sounds.alreadyfound.sound","ENTITY_VILLAGER_ANGRY")),1,main.getConfigInt("sounds.eggfound.pitch",1));
                 }
             }
-
-
-
-
-            /*for (Integer i = 0 ;i < main.getDataFile().getKeys(false).size();i++)
-            if (e.getClickedBlock().getLocation().equals(main.getDataFile().get()));
-
-            for(String str : main.getDataFile().getConfigurationSection("data").getKeys(false)) {
-                if (e.getClickedBlock().getLocation().equals(main.getDataFile().get(str))) {*/
-
-
         }
     }
+    @EventHandler
+    public void onInvClick (InventoryClickEvent e) {
+        if (e.getCurrentItem()!=null && !e.getSlotType().equals(InventoryType.SlotType.OUTSIDE)) {
+            Player p = (Player) e.getWhoClicked();
+            ItemStack i = e.getCurrentItem();
+            Inventory inv =e.getInventory();
+
+
+            //EGGS LIST
+            if (i!=null && i.getType()!=null && inv.getTitle().contains("Eggs Editor")) {
+                int page;
+                if (inv.getItem(45)!=null)
+                    page = Integer.parseInt(inv.getItem(45).getItemMeta().getLocalizedName());
+                else
+                    page = 1;
+                // OPEN EDITOR
+                if (i.getType()==Material.SKULL_ITEM && e.getClick().isLeftClick()) {
+                    storage.addEditingEgg(p,storage.getEggs().get(Integer.parseInt(i.getItemMeta().getLocalizedName())));
+                    new EditorGUI(p,storage.getEggs().get(Integer.parseInt(i.getItemMeta().getLocalizedName())),main,storage);
+                }
+                // TELEPORT TO EGG
+                if (i.getType()==Material.SKULL_ITEM && e.getClick().isRightClick()) {
+                    main.sendMessage(p,main.getConfigString("messages.teleported","&fYou have been teleported to &eEaster Egg &6#%id%&f!").replace("%id%",i.getItemMeta().getLocalizedName()));
+                    Location loc =  storage.getEggs().get(Integer.parseInt(i.getItemMeta().getLocalizedName())).getLoc();
+                    loc.add(0.5,0.5,0.5);
+                    p.teleport(loc);
+                }
+                //Switching pages
+                if (e.getSlot()==45 && i.getType().equals(Material.ARROW)) {
+                    new GUI(p,page-1,main,storage);
+                } else if (e.getSlot()==53 && i.getType().equals(Material.ARROW)){
+                    new GUI(p,page+1,main,storage);
+                }
+
+                e.setCancelled(true);
+            }
+
+            //EGG EDITOR
+            if (i!=null && i.getType()!=null && inv.getTitle().contains("Egg Editor")) {
+
+                //BACK BUTTON
+                if (i.getItemMeta().getLocalizedName().equals("back")) {
+                    new GUI(p, 1, main, storage);
+                }
+
+                //COMMAND LIST
+                if (i.getItemMeta().getLocalizedName().contains("command")) {
+                    new CommandsGUI(p,storage.getEditingEgg(p),1,main,storage);
+                }
+
+                //DELETE EGG
+                if (i.getItemMeta().getLocalizedName().contains("delete")) {
+                    new BukkitRunnable() {
+                        @Override
+                        public void run(){
+                            if (storage.getEgg(storage.getEditingEgg(p).getLoc())!=null) {
+                                Egg egg = storage.getEditingEgg(p);
+
+                                for (UUID uuid : storage.getPlayers().keySet()) {
+                                    OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
+                                    if (player!=null)
+                                        if (storage.hasEgg(player.getUniqueId(),egg))
+                                            storage.getPlayer(player.getUniqueId()).removeEgg(egg);
+                                }
+                                try {
+                                    storage.removeEgg(egg);
+                                } catch (IOException ioException) {
+                                    ioException.printStackTrace();
+                                }
+                                main.sendMessage(p,main.getConfigString("messages.eggremoved","&cEgg was successfully removed!"));
+                            }
+                        }
+                    }.runTaskAsynchronously(main);
+                    p.closeInventory();
+                }
+
+                e.setCancelled(true);
+
+            }
+
+            //EGG COMMANDS EDITOR
+            if (i!=null && i.getType()!=null && inv.getTitle().contains("Commands Editor")) {
+
+                //SETTING PAGE
+                int page;
+                if (inv.getItem(45)!=null)
+                    page = Integer.parseInt(inv.getItem(45).getItemMeta().getLocalizedName());
+                else
+                    page = 1;
+
+                //SWITCHING PAGES
+                if (e.getSlot()==45 && i.getType().equals(Material.ARROW)) {
+                    new GUI(p,page-1,main,storage);
+                } else if (e.getSlot()==53 && i.getType().equals(Material.ARROW)){
+                    new GUI(p,page+1,main,storage);
+                }
+
+                //BACK BUTTON
+                if (e.getCurrentItem().getItemMeta().getLocalizedName().equals("back")) {
+                    new EditorGUI(p,storage.getEditingEgg(p),main,storage);
+                }
+
+                //ADDING ITEM
+                if (e.getCurrentItem().getItemMeta().getLocalizedName().equals("add")) {
+                    main.sendMessage(p,main.getConfigString("messages.typecommand","&e[!] &fType command into the chat! &c(Don't use slashes!)\n&7&oType 'cancel' to cancel the action"));
+                    p.closeInventory();
+                    storage.addTyping(p);
+                }
+
+                //COMMAND ITEM - Removing
+                if (e.getCurrentItem().getType().equals(Material.PAPER) && e.getClick().isRightClick()) {
+                    String cmd = e.getCurrentItem().getItemMeta().getLocalizedName();
+                    Egg egg = storage.getEditingEgg(p);
+
+                    main.sendMessage(p, main.getConfigString("messages.commandremoved","Command &c%cmd%&f has been &cremoved&f!").replace("%cmd%",cmd));
+                    egg.removeCommand(cmd);
+                    new CommandsGUI(p, storage.getEditingEgg(p),1,main,storage);
+                }
+
+                e.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onChat(AsyncPlayerChatEvent e) {
+        Player p = e.getPlayer();
+        if (storage.isTyping(p)) {
+            String cmd = e.getMessage();
+            Egg egg = storage.getEditingEgg(p);
+
+            //ADDING
+            if (!cmd.equals("cancel")) {
+                egg.addCommand(cmd);
+                main.sendMessage(p,main.getConfigString("messages.commandadded","Command &e%cmd%&f has been added!").replace("%cmd%",cmd));
+            }
+
+            //Cancel ADDING
+            else {
+                main.sendMessage(p,main.getConfigString("messages.actioncancelled","&cAction has been cancelled!"));
+            }
+            storage.removeTyping(p);
+            new CommandsGUI(p, storage.getEditingEgg(p),1,main,storage);
+            e.setCancelled(true);
+        }
+
+    }
+
 }

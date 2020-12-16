@@ -32,5 +32,15 @@ public class Egg {
     public void setCommands(List<String> commands) {
         this.commands = commands;
     }
+    public void addCommand(String command) {
+        if (this.commands==null) {
+            this.commands = new ArrayList<>();
+            this.commands.add(command);
+        } else
+            this.commands.add(command);
+    }
+    public void removeCommand(String command){
+        this.commands.remove(command);
+    }
 
 }

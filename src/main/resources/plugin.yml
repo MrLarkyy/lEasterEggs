@@ -1,3 +1,7 @@
 name: Eastereggs
 version: ${project.version}
 main: eastereggs.Eastereggs
+commands:
+  eastereggs:
+    description: EasterEggs
+    aliases: [ee]
