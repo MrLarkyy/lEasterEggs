@@ -1,6 +1,5 @@
 package eastereggs;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import eastereggs.Managers.EasterEggsCommand;
 import eastereggs.Managers.Egg;
 import eastereggs.Managers.Runnables.ChangerandomSkinRunnable;
@@ -8,7 +7,10 @@ import eastereggs.Managers.Runnables.CheckEggsRunnable;
 import eastereggs.Managers.Runnables.ParticlesRunnable;
 import eastereggs.Managers.Runnables.SaveConfigRunnable;
 import eastereggs.Managers.StorageManager;
+import eastereggs.PlaceholderAPI.Placeholders;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -46,6 +48,9 @@ public final class Eastereggs extends JavaPlugin {
         getCommand("eastereggs").setExecutor(new EasterEggsCommand(this,storage));
         getServer().getPluginManager().registerEvents(new EggsListener(this),this);
 
+        if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            new Placeholders(this,storage).register();
+        }
         new ChangerandomSkinRunnable(this,storage).runTaskTimerAsynchronously(this,40,30);
         new CheckEggsRunnable(this,storage).runTask(this);
         new ParticlesRunnable(this,storage).runTaskTimerAsynchronously(this,40,10);
@@ -72,9 +77,6 @@ public final class Eastereggs extends JavaPlugin {
     public File getFile() {
         return dataFile;
     }
-    public File getCFile() {
-        return configFile;
-    }
 
 
     public void loadFiles() throws IOException {
@@ -98,7 +100,7 @@ public final class Eastereggs extends JavaPlugin {
         }
     }
     public List<String> getConfigList(String path, List<String> defaultValue) {
-        if (getConfigFile().getList(path)!=null) {
+        if (getConfigFile().getStringList(path)!=null && !getConfigFile().getStringList(path).isEmpty()) {
             return getConfigFile().getStringList(path);
         } else {
             getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',"&c[EasterEggs] Path '"+path+"' is missing, please add it! (Using default value)"));
@@ -109,6 +111,43 @@ public final class Eastereggs extends JavaPlugin {
     public boolean getConfigBoolean(String path, Boolean defaultValue) {
         if (getConfigFile().getString(path)!=null)
             return getConfigFile().getBoolean(path);
+        else {
+            getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',"&c[EasterEggs] Path '"+path+"' is missing, please add it! (Using default value)"));
+            return defaultValue;
+        }
+    }
+    public Color getConfigColor(String path, Color defaultValue) {
+        if (getConfigFile().getString(path)!=null)
+            switch (getConfig().getString(path)) {
+                case "AQUA":
+                    return Color.AQUA;
+                case "FUCHSIA":
+                    return Color.FUCHSIA;
+                case "PURPLE":
+                    return Color.PURPLE;
+                case "BLUE":
+                    return Color.BLUE;
+                case "GREEN":
+                    return Color.GREEN;
+                case "LIME":
+                    return Color.LIME;
+                case "MAROON":
+                    return Color.MAROON;
+                case "NAVY":
+                    return Color.NAVY;
+                case "ORANGE":
+                    return Color.ORANGE;
+                case "YELLOW":
+                    return Color.YELLOW;
+                case "BLACK":
+                    return Color.BLACK;
+                case "SILVER":
+                    return Color.SILVER;
+                case "GRAY":
+                    return Color.GRAY;
+                default:
+                    return Color.WHITE;
+            }
         else {
             getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',"&c[EasterEggs] Path '"+path+"' is missing, please add it! (Using default value)"));
             return defaultValue;

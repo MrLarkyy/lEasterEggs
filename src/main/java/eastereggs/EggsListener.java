@@ -9,8 +9,9 @@ import eastereggs.Managers.Inventories.GUIUtil;
 import eastereggs.Managers.StorageManager;
 import org.bukkit.*;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.Skull;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -25,7 +26,8 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.inventory.meta.FireworkEffectMeta;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.IOException;
@@ -40,13 +42,14 @@ public class EggsListener implements Listener {
     public EggsListener (Eastereggs main) {
         this.main = main;
         this.storage = main.storage;
+        this.textures = main.getConfigList("eggtextures",Arrays.asList("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjU2ZjdmM2YzNTM2NTA2NjI2ZDVmMzViNDVkN2ZkZjJkOGFhYjI2MDA4NDU2NjU5ZWZlYjkxZTRjM2E5YzUifX19","eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNThiOWUyOWFiMWE3OTVlMmI4ODdmYWYxYjFhMzEwMjVlN2NjMzA3MzMzMGFmZWMzNzUzOTNiNDVmYTMzNWQxIn19fQ==", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjJjZDVkZjlkN2YxZmE4MzQxZmNjZTJmM2MxMThlMmY1MTdlNGQyZDk5ZGYyYzUxZDYxZDkzZWQ3ZjgzZTEzIn19fQ==", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYzc2NTk1ZWZmY2M1NjI3ZTg1YjE0YzljODgyNDY3MWI1ZWMyOTY1NjU5YzhjNDE3ODQ5YTY2Nzg3OGZhNDkwIn19fQ==", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjNkNjliMjNhZTU5MmM2NDdlYjhkY2ViOWRhYWNlNDQxMzlmNzQ4ZTczNGRjODQ5NjI2MTNjMzY2YTA4YiJ9fX0=", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2RjM2VlNDYxNDdmMzM3ZGE0ZGY5MTRiZDUyODg3MTI4N2Y5ZTY3MmM5NjQ1YmY1MWQ0MzhjYTU1NDM4ZjM5NyJ9fX0="));
     }
     public GUIUtil util = new GUIUtil();
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
-        EggPlayer eggPlayer = new EggPlayer(e.getPlayer().getUniqueId(),new ArrayList<>());
+        EggPlayer eggPlayer = new EggPlayer(p.getUniqueId(),new ArrayList<>());
         storage.addPlayer(eggPlayer);
     }
     @EventHandler (ignoreCancelled = true)
@@ -54,17 +57,21 @@ public class EggsListener implements Listener {
         Player p = e.getPlayer();
         Block b = e.getBlock();
 
-        if (p.isSneaking()) {
-            new BukkitRunnable() {
-                @Override
-                public void run(){
-                    if (storage.getEgg(b.getLocation())!=null) {
+        if (storage.getEgg(b.getLocation()) != null) {
+            if (!p.isSneaking()) {
+                e.setCancelled(true);
+            } else {
+
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+
                         Egg egg = storage.getEgg(b.getLocation());
 
                         for (UUID uuid : storage.getPlayers().keySet()) {
                             OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
-                            if (player!=null)
-                                if (storage.hasEgg(player.getUniqueId(),egg))
+                            if (player != null)
+                                if (storage.hasEgg(player.getUniqueId(), egg))
                                     storage.getPlayer(player.getUniqueId()).removeEgg(egg);
                         }
                         try {
@@ -72,14 +79,16 @@ public class EggsListener implements Listener {
                         } catch (IOException ioException) {
                             ioException.printStackTrace();
                         }
-                        main.sendMessage(p, main.getConfigString("messages.eggremoved","&cEgg was successfully removed!"));
+                        main.sendMessage(p, main.getConfigString("messages.eggremoved", "&cEgg was successfully removed!"));
+
                     }
-                }
-            }.runTaskAsynchronously(main);
+                }.runTaskAsynchronously(main);
+            }
         }
+
     }
 
-    private List<String> textures = main.getConfigList("eggtextures",Arrays.asList("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjU2ZjdmM2YzNTM2NTA2NjI2ZDVmMzViNDVkN2ZkZjJkOGFhYjI2MDA4NDU2NjU5ZWZlYjkxZTRjM2E5YzUifX19","eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNThiOWUyOWFiMWE3OTVlMmI4ODdmYWYxYjFhMzEwMjVlN2NjMzA3MzMzMGFmZWMzNzUzOTNiNDVmYTMzNWQxIn19fQ==", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjJjZDVkZjlkN2YxZmE4MzQxZmNjZTJmM2MxMThlMmY1MTdlNGQyZDk5ZGYyYzUxZDYxZDkzZWQ3ZjgzZTEzIn19fQ==", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYzc2NTk1ZWZmY2M1NjI3ZTg1YjE0YzljODgyNDY3MWI1ZWMyOTY1NjU5YzhjNDE3ODQ5YTY2Nzg3OGZhNDkwIn19fQ==", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjNkNjliMjNhZTU5MmM2NDdlYjhkY2ViOWRhYWNlNDQxMzlmNzQ4ZTczNGRjODQ5NjI2MTNjMzY2YTA4YiJ9fX0=", "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2RjM2VlNDYxNDdmMzM3ZGE0ZGY5MTRiZDUyODg3MTI4N2Y5ZTY3MmM5NjQ1YmY1MWQ0MzhjYTU1NDM4ZjM5NyJ9fX0="));
+    private List<String> textures;
     @EventHandler (ignoreCancelled = true)
     public void onPlace(BlockPlaceEvent e) throws IOException {
         Player p = e.getPlayer();
@@ -87,7 +96,7 @@ public class EggsListener implements Listener {
 
         if (p.getInventory().getItemInMainHand().getItemMeta()!=null && p.getInventory().getItemInMainHand().getItemMeta().getLocalizedName()!=null) {
             if (p.getInventory().getItemInMainHand().getItemMeta().getLocalizedName().contains("easteregg")) {
-                main.saveEgg(b.getLocation(), null, p);
+                main.saveEgg(b.getLocation(), main.getConfigFile().getStringList("predefinedcommands"), p);
                 main.sendMessage(p, main.getConfigString("messages.eggcreated","&fYou have created an &eEaster Egg&f!"));
                 main.getDataFile().save(main.getFile());
             }
@@ -100,6 +109,8 @@ public class EggsListener implements Listener {
             }
         }
     }
+    ArrayList<Color> colors = new ArrayList<>(Arrays.asList(Color.AQUA,Color.FUCHSIA,Color.PURPLE,Color.BLUE,Color.GREEN,Color.LIME,Color.MAROON,Color.NAVY,Color.ORANGE,Color.ORANGE,Color.WHITE,Color.YELLOW));
+
     @EventHandler
     public void onInteract(PlayerInteractEvent e) {
         Player p = e.getPlayer();
@@ -113,6 +124,26 @@ public class EggsListener implements Listener {
                     if (main.getConfigBoolean("sounds.eggfound.enabled",true))
                         p.playSound(p.getLocation(),Sound.valueOf(main.getConfigString("sounds.eggfound.sound","ENTITY_PLAYER_LEVELUP")),1,main.getConfigInt("sounds.eggfound.pitch",1));
 
+                    //Title
+                    if (main.getConfigBoolean("title.enabled",true))
+                        p.sendTitle(ChatColor.translateAlternateColorCodes('&',main.getConfigString("title.title","&dCongratulation!")),ChatColor.translateAlternateColorCodes('&',main.getConfigString("title.subtitle","&fYou have found an egg.")),main.getConfigInt("title.fadein",10),main.getConfigInt("title.stay",10),main.getConfigInt("title.fadeout",10));
+
+                    //Firework
+                    if (main.getConfigBoolean("firework.enabled",true)) {
+                        Collections.shuffle(colors);
+                        Firework firework = (Firework) egg.getLoc().getWorld().spawnEntity(egg.getLoc(), EntityType.FIREWORK);
+                        FireworkMeta fireworkMeta = firework.getFireworkMeta();
+                        FireworkEffect effect;
+                        if (main.getConfigBoolean("firework.random",true)) {
+                            effect = FireworkEffect.builder().flicker(true).withColor(colors.get(1)).withFade(colors.get(2)).build();
+                        } else
+                            effect = FireworkEffect.builder().flicker(true).withColor(main.getConfigColor("firework.colors.color1",Color.YELLOW)).withFade(main.getConfigColor("firework.colors.color2",Color.AQUA)).build();
+                        fireworkMeta.addEffect(effect);
+                        fireworkMeta.setPower(0);
+
+                        firework.setFireworkMeta(fireworkMeta);
+                    }
+
                     // Sending Commands
                     if (egg.getCommands()!=null)
                     for (String str : egg.getCommands()) {
@@ -121,7 +152,7 @@ public class EggsListener implements Listener {
                     }
                 } else {
                     main.sendMessage(p,main.getConfigString("messages.alreadyfound","&cYou have already found this Easter Egg!"));
-                    if (main.getConfigBoolean("sounds.alreadyfound.enabled",true)) p.playSound(p.getLocation(),Sound.valueOf(main.getConfigString("sounds.alreadyfound.sound","ENTITY_VILLAGER_ANGRY")),1,main.getConfigInt("sounds.eggfound.pitch",1));
+                    if (main.getConfigBoolean("sounds.alreadyfound.enabled",true)) p.playSound(p.getLocation(),Sound.valueOf(main.getConfigString("sounds.alreadyfound.sound","ENTITY_VILLAGER_NO")),1,main.getConfigInt("sounds.eggfound.pitch",1));
                 }
             }
         }
@@ -135,7 +166,7 @@ public class EggsListener implements Listener {
 
 
             //EGGS LIST
-            if (i!=null && i.getType()!=null && inv.getTitle().contains("Eggs Editor")) {
+            if (i!=null && i.getType()!=null && e.getView().getTitle().contains("Eggs Editor")) {
                 int page;
                 if (inv.getItem(45)!=null)
                     page = Integer.parseInt(inv.getItem(45).getItemMeta().getLocalizedName());
@@ -164,42 +195,44 @@ public class EggsListener implements Listener {
             }
 
             //EGG EDITOR
-            if (i!=null && i.getType()!=null && inv.getTitle().contains("Egg Editor")) {
+            if (i!=null && i.getType()!=null && e.getView().getTitle().contains("Egg Editor")) {
 
                 //BACK BUTTON
-                if (i.getItemMeta().getLocalizedName().equals("back")) {
-                    new GUI(p, 1, main, storage);
-                }
+                if (e.getCurrentItem()!=null && e.getCurrentItem().getItemMeta()!=null) {
+                    if (i.getItemMeta().getLocalizedName().equals("back")) {
+                        new GUI(p, 1, main, storage);
+                    }
 
-                //COMMAND LIST
-                if (i.getItemMeta().getLocalizedName().contains("command")) {
-                    new CommandsGUI(p,storage.getEditingEgg(p),1,main,storage);
-                }
+                    //COMMAND LIST
+                    if (i.getItemMeta().getLocalizedName().contains("command")) {
+                        new CommandsGUI(p, storage.getEditingEgg(p), 1, main, storage);
+                    }
 
-                //DELETE EGG
-                if (i.getItemMeta().getLocalizedName().contains("delete")) {
-                    new BukkitRunnable() {
-                        @Override
-                        public void run(){
-                            if (storage.getEgg(storage.getEditingEgg(p).getLoc())!=null) {
-                                Egg egg = storage.getEditingEgg(p);
+                    //DELETE EGG
+                    if (i.getItemMeta().getLocalizedName().contains("delete")) {
+                        new BukkitRunnable() {
+                            @Override
+                            public void run() {
+                                if (storage.getEgg(storage.getEditingEgg(p).getLoc()) != null) {
+                                    Egg egg = storage.getEditingEgg(p);
 
-                                for (UUID uuid : storage.getPlayers().keySet()) {
-                                    OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
-                                    if (player!=null)
-                                        if (storage.hasEgg(player.getUniqueId(),egg))
-                                            storage.getPlayer(player.getUniqueId()).removeEgg(egg);
+                                    for (UUID uuid : storage.getPlayers().keySet()) {
+                                        OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
+                                        if (player != null)
+                                            if (storage.hasEgg(player.getUniqueId(), egg))
+                                                storage.getPlayer(player.getUniqueId()).removeEgg(egg);
+                                    }
+                                    try {
+                                        storage.removeEgg(egg);
+                                    } catch (IOException ioException) {
+                                        ioException.printStackTrace();
+                                    }
+                                    main.sendMessage(p, main.getConfigString("messages.eggremoved", "&cEgg was successfully removed!"));
                                 }
-                                try {
-                                    storage.removeEgg(egg);
-                                } catch (IOException ioException) {
-                                    ioException.printStackTrace();
-                                }
-                                main.sendMessage(p,main.getConfigString("messages.eggremoved","&cEgg was successfully removed!"));
                             }
-                        }
-                    }.runTaskAsynchronously(main);
-                    p.closeInventory();
+                        }.runTaskAsynchronously(main);
+                        p.closeInventory();
+                    }
                 }
 
                 e.setCancelled(true);
@@ -207,7 +240,7 @@ public class EggsListener implements Listener {
             }
 
             //EGG COMMANDS EDITOR
-            if (i!=null && i.getType()!=null && inv.getTitle().contains("Commands Editor")) {
+            if (i!=null && i.getType()!=null && e.getView().getTitle().contains("Commands Editor")) {
 
                 //SETTING PAGE
                 int page;
@@ -223,26 +256,28 @@ public class EggsListener implements Listener {
                     new GUI(p,page+1,main,storage);
                 }
 
-                //BACK BUTTON
-                if (e.getCurrentItem().getItemMeta().getLocalizedName().equals("back")) {
-                    new EditorGUI(p,storage.getEditingEgg(p),main,storage);
-                }
+                if (e.getCurrentItem()!=null && e.getCurrentItem().getItemMeta()!=null) {
+                    //BACK BUTTON
+                    if (e.getCurrentItem().getItemMeta().getLocalizedName().equals("back")) {
+                        new EditorGUI(p,storage.getEditingEgg(p),main,storage);
+                    }
 
-                //ADDING ITEM
-                if (e.getCurrentItem().getItemMeta().getLocalizedName().equals("add")) {
-                    main.sendMessage(p,main.getConfigString("messages.typecommand","&e[!] &fType command into the chat! &c(Don't use slashes!)\n&7&oType 'cancel' to cancel the action"));
-                    p.closeInventory();
-                    storage.addTyping(p);
-                }
+                    //ADDING ITEM
+                    if (e.getCurrentItem().getItemMeta().getLocalizedName().equals("add")) {
+                        main.sendMessage(p,main.getConfigString("messages.typecommand","&e[!] &fType command into the chat! &c(Don't use slashes!)\n&7&oType 'cancel' to cancel the action"));
+                        p.closeInventory();
+                        storage.addTyping(p);
+                    }
 
-                //COMMAND ITEM - Removing
-                if (e.getCurrentItem().getType().equals(Material.PAPER) && e.getClick().isRightClick()) {
-                    String cmd = e.getCurrentItem().getItemMeta().getLocalizedName();
-                    Egg egg = storage.getEditingEgg(p);
+                    //COMMAND ITEM - Removing
+                    if (e.getCurrentItem().getType().equals(Material.PAPER) && e.getClick().isRightClick()) {
+                        String cmd = e.getCurrentItem().getItemMeta().getLocalizedName();
+                        Egg egg = storage.getEditingEgg(p);
 
-                    main.sendMessage(p, main.getConfigString("messages.commandremoved","Command &c%cmd%&f has been &cremoved&f!").replace("%cmd%",cmd));
-                    egg.removeCommand(cmd);
-                    new CommandsGUI(p, storage.getEditingEgg(p),1,main,storage);
+                        main.sendMessage(p, main.getConfigString("messages.commandremoved","Command &c%cmd%&f has been &cremoved&f!").replace("%cmd%",cmd));
+                        egg.removeCommand(cmd);
+                        new CommandsGUI(p, storage.getEditingEgg(p),1,main,storage);
+                    }
                 }
 
                 e.setCancelled(true);
@@ -268,6 +303,7 @@ public class EggsListener implements Listener {
                 main.sendMessage(p,main.getConfigString("messages.actioncancelled","&cAction has been cancelled!"));
             }
             storage.removeTyping(p);
+            if (Bukkit.getVersion().contains("1.12"))
             new CommandsGUI(p, storage.getEditingEgg(p),1,main,storage);
             e.setCancelled(true);
         }

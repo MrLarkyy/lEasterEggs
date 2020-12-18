@@ -49,11 +49,45 @@ messages:
 
   ##This message is sent when you type '/ee createrandom'
   ##The command gives you a skull that changes a skin every 1.5 secs and after every block place event!
-  randomegggive: "&aRandom Egg has been given!"
+  createrandom: "&aRandom Egg has been given!"
 
   ##Usages for commands
   usages:
     tp: "&cUsage: /ee tp <ID>"
+
+## Predefined Commands for new Easter Eggs
+## When you create a new easter egg, it will assign these commands to it!
+predefinedcommands: ## Variables: %player%
+  - "give %player% stone 1"
+
+##Title sent when a player find an egg!
+title:
+
+  ##Enable title?
+  enabled: true
+
+  title: "&dCongratulation!"
+  subtitle: "&fYou have found an egg."
+
+  fadein: 10
+  stay: 10
+  fadeout: 10
+
+##Firework will spawn when a player find an Egg!
+firework:
+
+  ##Enable firework?
+  enabled: true
+
+  ##Left on true, if you want to use random colors for fireworks
+  random: true
+
+  ##Used when random is set to FALSE!
+  ##Available colors: AQUA, FUCHSIA, PURPLE, BLUE, GREEN, LIME, MAROON, NAVY, ORANGE, WHITE, YELLOW, BLACK, SILVER, GRAY
+  colors:
+    ##You can use fade, but if you don't want to, use both colors to the same one!
+    color1: YELLOW
+    color2: AQUA
 
 ##Particle effects on non-found Eggs
 ##Particles are per-player, so if you found an egg and other player not, only the player will see the particle effect!
@@ -95,7 +129,7 @@ sounds:
   ##Type of sound
     ##List of sounds for 1.12.2: https://helpch.at/docs/1.12.2/org/bukkit/Sound.html
     ##List of sounds for 1.16.4: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Sound.html
-    sound: ENTITY_VILLAGER_ANGRY
+    sound: ENTITY_VILLAGER_NO
 
     ##Pitch of the sound
     pitch: 1

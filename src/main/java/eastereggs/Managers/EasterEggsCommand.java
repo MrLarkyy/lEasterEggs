@@ -83,9 +83,7 @@ public class EasterEggsCommand implements CommandExecutor {
                     main.sendMessage(p,main.getConfigString("messages.randomegggive","&aRandom Egg has been given!"));
 
 
-
-
-                } else {
+                } else if (!args[0].equals("createrandom") && !args[0].equals("create") && !args[0].equals("tp") && !args[0].equals("menu")){
                     main.sendMessage(p,"&6EasterEggs Help Page:\n&e/ee menu &6- &fOpens a menu with all eggs\n&e/ee tp <id> &6- &fTeleports you to an egg\n&e/ee create &6- &fMakes a new Easter Egg");
                 }
 

@@ -1,6 +1,10 @@
 name: Eastereggs
 version: ${project.version}
 main: eastereggs.Eastereggs
+
+softdepend:
+  - PlaceholderAPI
+
 commands:
   eastereggs:
     description: EasterEggs

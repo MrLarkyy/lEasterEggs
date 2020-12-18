@@ -11,8 +11,6 @@ public class Egg {
 
     private List<String> commands;
 
-    private int ID;
-
     public Egg(Location loc, List<String> commands) {
         this.loc = loc;
         this.commands = commands;
