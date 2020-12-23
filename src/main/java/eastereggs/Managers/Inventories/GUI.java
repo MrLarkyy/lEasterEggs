@@ -29,7 +29,6 @@ public class GUI {
         ItemMeta eggmeta;
 
         for (Map.Entry<Integer, Egg> pair : storage.getEggs().entrySet()) {
-            //eggitem = GUIUtil.mkitem(Material.SKULL_ITEM,"&eEgg &6#"+String.valueOf(pair.getKey()),String.valueOf(pair.getKey()), GUIUtil.mkLore("",Arrays.asList(" ","&6Left-Click&e to edit","&6Right-Click&e to teleport"," ","&eLocation:","&eWorld: &6"+pair.getValue().getLoc().getWorld().getName(),"&ex: &6"+pair.getValue().getLoc().getX(),"&ey: &6"+pair.getValue().getLoc().getY(),"&ez: &6"+pair.getValue().getLoc().getZ())));
             //CREATING ITEMSTACK
             eggitem = new ItemStack(Material.SKULL_ITEM,1,(byte) SkullType.PLAYER.ordinal());
             eggmeta = eggitem.getItemMeta();

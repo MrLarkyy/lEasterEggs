@@ -33,7 +33,7 @@ public class EasterEggsCommand implements CommandExecutor {
                 // MENU COMMAND
                 if (args[0].equals("menu") && p.hasPermission(main.getConfigString("permissions.menu","leggs.menu"))) {
                     new GUI(p, 1, main, storage);
-                } else if (!p.hasPermission(main.getConfigString("permissions.menu","leggs.menu"))) {
+                } else if (args[0].equals("menu") && !p.hasPermission(main.getConfigString("permissions.menu","leggs.menu"))) {
                     main.sendMessage(p,main.getConfigString("messages.nopermission","&cYou have no permission to do that!"));
                 }
 
@@ -44,15 +44,18 @@ public class EasterEggsCommand implements CommandExecutor {
                             int id = Integer.parseInt(args[1]);
                             storage.getEggs().containsKey(id);
                             Egg egg = storage.getEggs().get(id);
-                            p.teleport(egg.getLoc());
-                            main.sendMessage(p,main.getConfigString("messages.teleported","&fYou have been teleported to &eEater Egg &6#%id%").replace("%id%",String.valueOf(storage.getEggID(egg))));
+                            if (egg!=null) {
+                                p.teleport(egg.getLoc());
+                                main.sendMessage(p, main.getConfigString("messages.teleported", "&fYou have been teleported to &eEater Egg &6#%id%").replace("%id%", String.valueOf(storage.getEggID(egg))));
+                            } else
+                                main.sendMessage(p,main.getConfigString("messages.unknownid","&cThis ID is unknown! Check IDs in /ee menu"));
                         } catch (NumberFormatException e) {
                             main.sendMessage(p,main.getConfigString("messages.unknownid","&cThis ID is unknown! Check IDs in /ee menu"));
                         }
                     } else {
                         main.sendMessage(p,main.getConfigString("messages.usages.tp","&cUsage: /ee tp <id>"));
                     }
-                } else if (!p.hasPermission(main.getConfigString("permissions.tp","leggs.tp"))) {
+                } else if (args[0].equals("tp") && !p.hasPermission(main.getConfigString("permissions.tp","leggs.tp"))) {
                     main.sendMessage(p,main.getConfigString("messages.nopermission","&cYou have no permission to do that!"));
                 }
 
@@ -74,17 +77,18 @@ public class EasterEggsCommand implements CommandExecutor {
                     } else {
                         main.sendMessage(p, main.getConfigString("messages.mustholdblock","&cYou must hold a block to create an Easter Egg!"));
                     }
-                } else if (!p.hasPermission(main.getConfigString("permissions.create","leggs.create"))) {
+                } else if (args[0].equals("create") && !p.hasPermission(main.getConfigString("permissions.create","leggs.create"))) {
                     main.sendMessage(p,main.getConfigString("messages.nopermission","&cYou have no permission to do that!"));
                 }
                 // RANDOM SKULL COMMAND
                 if (args[0].equals("createrandom") && p.hasPermission(main.getConfigString("permissions.createrandom","leggs.createrandom"))) {
-                    p.getInventory().addItem(GUIUtil.mkskull("&dEaster Egg &7(Place)","randomeasteregg",Arrays.asList(" ","&dPlace&f to make a new egg!"),"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjU2ZjdmM2YzNTM2NTA2NjI2ZDVmMzViNDVkN2ZkZjJkOGFhYjI2MDA4NDU2NjU5ZWZlYjkxZTRjM2E5YzUifX19"));
-                    main.sendMessage(p,main.getConfigString("messages.randomegggive","&aRandom Egg has been given!"));
-
+                    p.getInventory().addItem(GUIUtil.mkskull("&dEaster Egg &7(Place)", "randomeasteregg", Arrays.asList(" ", "&dPlace&f to make a new egg!"), "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjU2ZjdmM2YzNTM2NTA2NjI2ZDVmMzViNDVkN2ZkZjJkOGFhYjI2MDA4NDU2NjU5ZWZlYjkxZTRjM2E5YzUifX19"));
+                    main.sendMessage(p, main.getConfigString("messages.randomegggive", "&aRandom Egg has been given!"));
+                } else if (args[0].equals("createrandom") && !p.hasPermission(main.getConfigString("permissions.createrandom","leggs.createrandom"))) {
+                    main.sendMessage(p,main.getConfigString("messages.nopermission","&cYou have no permission to do that!"));
 
                 } else if (!args[0].equals("createrandom") && !args[0].equals("create") && !args[0].equals("tp") && !args[0].equals("menu")){
-                    main.sendMessage(p,"&6EasterEggs Help Page:\n&e/ee menu &6- &fOpens a menu with all eggs\n&e/ee tp <id> &6- &fTeleports you to an egg\n&e/ee create &6- &fMakes a new Easter Egg");
+                    main.sendMessage(p,"&6EasterEggs Help Page:\n&e/ee menu &6- &fOpens a menu with all eggs\n&e/ee tp <id> &6- &fTeleports you to an egg\n&e/ee create &6- &fMakes a new Easter Egg\n&e/ee createramdom &6- &fMakes a new egg with random skin");
                 }
 
             } else {

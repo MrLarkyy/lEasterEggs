@@ -120,6 +120,11 @@ public class StorageManager {
         players.put(eggPlayer.getUuid(),eggPlayer);
     }
 
+    public HashMap<UUID,EggPlayer> getEggPlayers(){
+        return (HashMap<UUID, EggPlayer>) players.clone();
+    }
+
+
     public void addEditingEgg (Player p, Egg egg) {
         editingegg.remove(p);
         editingegg.put(p,egg);
@@ -162,9 +167,17 @@ public class StorageManager {
     }
 
     public boolean hasEgg (UUID uuid, Egg egg) {
-        if (getPlayer(uuid)==null) Bukkit.broadcastMessage("Player is null");
-        if (getPlayer(uuid).getEggs()==null) Bukkit.broadcastMessage("Eggs are null");
         return (getPlayer(uuid).getEggs().contains(egg));
+    }
+
+    public int totalEggVar() {
+        return eggs.size();
+    }
+    public int foundEggVar(UUID uuid) {
+        return getPlayer(uuid).getEggs().size();
+    }
+    public int remainEggVar(UUID uuid) {
+        return (foundEggVar(uuid) - totalEggVar());
     }
 
 }

@@ -170,7 +170,7 @@ public final class Eastereggs extends JavaPlugin {
     }
 
     public void sendMessage(Player p, String message) {
-        p.sendMessage(ChatColor.translateAlternateColorCodes('&',message));
+        p.sendMessage(ChatColor.translateAlternateColorCodes('&',message.replace("%found%",String.valueOf(storage.foundEggVar(p.getUniqueId()))).replace("%total%",String.valueOf(storage.totalEggVar())).replace("%remain%",String.valueOf(storage.remainEggVar(p.getUniqueId())))));
     }
 
 }

@@ -50,7 +50,8 @@ public class EggsListener implements Listener {
     public void onJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
         EggPlayer eggPlayer = new EggPlayer(p.getUniqueId(),new ArrayList<>());
-        storage.addPlayer(eggPlayer);
+        if (!storage.getEggPlayers().containsKey(p.getUniqueId()))
+            storage.addPlayer(eggPlayer);
     }
     @EventHandler (ignoreCancelled = true)
     public void onBreak(BlockBreakEvent e) throws IOException {
@@ -112,7 +113,7 @@ public class EggsListener implements Listener {
     ArrayList<Color> colors = new ArrayList<>(Arrays.asList(Color.AQUA,Color.FUCHSIA,Color.PURPLE,Color.BLUE,Color.GREEN,Color.LIME,Color.MAROON,Color.NAVY,Color.ORANGE,Color.ORANGE,Color.WHITE,Color.YELLOW));
 
     @EventHandler
-    public void onInteract(PlayerInteractEvent e) {
+    public void onInteract(PlayerInteractEvent e) throws IOException {
         Player p = e.getPlayer();
         if (e.getAction().equals(Action.RIGHT_CLICK_BLOCK) && e.getHand().equals(EquipmentSlot.HAND)) {
             Block b = e.getClickedBlock();
@@ -120,13 +121,14 @@ public class EggsListener implements Listener {
                 Egg egg = storage.getEgg(b.getLocation());
                 if (!storage.hasEgg(p.getUniqueId(),egg)) {
                     storage.getPlayer(p.getUniqueId()).addEgg(egg);
+                    storage.saveEggPlayers();
                     main.sendMessage(p,main.getConfigString("messages.eggfound","&fYou have found an&e Easter Egg &6#%id%&f!").replace("%id%",String.valueOf(storage.getEggID(egg))));
                     if (main.getConfigBoolean("sounds.eggfound.enabled",true))
                         p.playSound(p.getLocation(),Sound.valueOf(main.getConfigString("sounds.eggfound.sound","ENTITY_PLAYER_LEVELUP")),1,main.getConfigInt("sounds.eggfound.pitch",1));
 
                     //Title
                     if (main.getConfigBoolean("title.enabled",true))
-                        p.sendTitle(ChatColor.translateAlternateColorCodes('&',main.getConfigString("title.title","&dCongratulation!")),ChatColor.translateAlternateColorCodes('&',main.getConfigString("title.subtitle","&fYou have found an egg.")),main.getConfigInt("title.fadein",10),main.getConfigInt("title.stay",10),main.getConfigInt("title.fadeout",10));
+                        p.sendTitle(ChatColor.translateAlternateColorCodes('&',main.getConfigString("title.title","&dCongratulation!").replace("%found%",String.valueOf(storage.foundEggVar(p.getUniqueId()))).replace("%remain%",String.valueOf(storage.foundEggVar(p.getUniqueId()))).replace("%total%",String.valueOf(storage.totalEggVar()))),ChatColor.translateAlternateColorCodes('&',main.getConfigString("title.subtitle","&fYou have found an egg.").replace("%found%",String.valueOf(storage.foundEggVar(p.getUniqueId()))).replace("%remain%",String.valueOf(storage.foundEggVar(p.getUniqueId()))).replace("%total%",String.valueOf(storage.totalEggVar()))),main.getConfigInt("title.fadein",10),main.getConfigInt("title.stay",10),main.getConfigInt("title.fadeout",10));
 
                     //Firework
                     if (main.getConfigBoolean("firework.enabled",true)) {
@@ -180,7 +182,7 @@ public class EggsListener implements Listener {
                 // TELEPORT TO EGG
                 if (i.getType()==Material.SKULL_ITEM && e.getClick().isRightClick()) {
                     main.sendMessage(p,main.getConfigString("messages.teleported","&fYou have been teleported to &eEaster Egg &6#%id%&f!").replace("%id%",i.getItemMeta().getLocalizedName()));
-                    Location loc =  storage.getEggs().get(Integer.parseInt(i.getItemMeta().getLocalizedName())).getLoc();
+                    Location loc =  storage.getEggs().get(Integer.parseInt(i.getItemMeta().getLocalizedName())).getLoc().clone();
                     loc.add(0.5,0.5,0.5);
                     p.teleport(loc);
                 }
